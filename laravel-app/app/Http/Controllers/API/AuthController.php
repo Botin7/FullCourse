@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\EmailVerificationNotification;
 
 class AuthController extends Controller
 {
@@ -20,6 +21,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => $request->password,
         ]);
+
+        $user->sendEmailVerificationNotification($request->callback_url);
 
         return response([
             'message' => 'User signed up.',
