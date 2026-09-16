@@ -1,18 +1,20 @@
 #!/bin/bash
 set -e
 
-# composer install
-php artisan migrate
-#wait $!
-
 # Create .env from example if it doesn't exist
 if [ ! -f "/var/www/html/.env" ]; then
     cp /var/www/html/.env.example /var/www/html/.env
 fi
 
-# Run key generate safely
-php artisan key:generate --no-interaction
+# Generate an application key only for a new environment. Changing it on every
+# restart invalidates signed verification links and encrypted session cookies.
+if ! grep -q '^APP_KEY=.\+' /var/www/html/.env; then
+    php artisan key:generate --no-interaction
+fi
 
-# Continue with standard container startup
-exec "$@"
-php artisan serve --host=0.0.0.0 --port=8000
+php artisan migrate --force
+
+# Notifications implement ShouldQueue, so keep a worker running in development.
+php artisan queue:work --tries=3 --timeout=60 &
+
+exec php artisan serve --host=0.0.0.0 --port=8000
