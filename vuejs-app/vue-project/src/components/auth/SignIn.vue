@@ -3,7 +3,7 @@
         <div class="login-box">
             <div class="card card-outline card-primary">
                 <div class="card-header text-center">
-                    <RouterLink to="/" class="h1"><b>Admin</b>LTE</RouterLink>
+                    <router-link to="/" class="h1"><b>Admin</b>LTE</router-link>
                 </div>
                 <div class="card-body">
                     <p class="login-box-msg">Sign in to start your session</p>
@@ -55,14 +55,24 @@
                             </div>
                         </div>
                     </form>
-                    <p class="mb-0">
-                        <RouterLink
+                    <div class="social-auth-links text-center mt-3 mb-3">
+                        <p>- OR -</p>
+                        <button
+                            @click="googleSignIn()"
+                            class="btn btn-block btn-danger"
+                        >
+                            <i class="fab fa-google mr-2"></i> Sign in with
+                            Google
+                        </button>
+                    </div>
+                    <p class="mb-1">
+                        <router-link
                             :to="{ name: 'auth.signup' }"
                             class="text-center"
-                            >Register a new membership</RouterLink
+                            >Register a new membership</router-link
                         >
                     </p>
-                                        <p class="mb-0">
+                    <p class="mb-0">
                         <router-link
                             :to="{ name: 'auth.reset-password' }"
                             class="text-center"
@@ -81,6 +91,8 @@ import { reactive } from "vue";
 import { apiSignIn } from "../../functions/api/auth";
 import { LoadingModal, MessageModal, CloseModal } from "../../functions/api/swal";
 import { useUserStore } from "../../stores/user";
+import { apiGoogleOAuthRedirect } from "../../functions/api/google-oauth";
+
 const router = useRouter();
 const userStore = useUserStore();
 
@@ -124,15 +136,29 @@ async function signIn() {
         const { status, data } = response;
         if (status === 422) {
             Object.keys(userError).forEach((key) => {
-                userError[key] = data.errors?.[key]?.[0] ?? "";
+                userError[key] = data.errors[key] ? data.errors[key][0] : "";
             });
             return CloseModal();
         }
         return MessageModal({
             icon: "error",
             title: "Error",
-            text: data.message ?? "Unable to sign in.",
+            text: data.message,
         });
     }
 }
+
+const googleSignIn = async () => {
+    try {
+        LoadingModal();
+        const response = await apiGoogleOAuthRedirect();
+        window.location.href = response.data.redirect_url;
+    } catch (error) {
+        return MessageModal({
+            icon: "error",
+            title: "Error",
+            text: error.response?.data?.message || error.message,
+        });
+    }
+};
 </script>

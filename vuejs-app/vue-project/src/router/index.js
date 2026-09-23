@@ -1,11 +1,20 @@
 import Signin from "../components/auth/SignIn.vue";
 import Signout from "../components/auth/SignOut.vue";
 import Signup from "../components/auth/SignUp.vue";
-import Dashboard from "../components/auth/Dashboard.vue";
+import Dashboard from "../components/pages/Dashboard.vue";
+import Profile from "../components/auth/Profile.vue";
 import VerifyEmail from "../components/auth/VerifyEmail.vue";
 import ResetPassword from "../components/auth/ResetPassword.vue";
 import SetNewPassword from "../components/auth/SetNewPassword.vue";
+import GoogleOAuth from "../components/auth/GoogleOAuth.vue";
 import { createRouter, createWebHistory } from "vue-router";
+
+
+import Navbar from "../components/includes/Navbar.vue";
+import LeftSidebar from "../components/includes/LeftSidebar.vue";
+import RightSidebar from "../components/includes/RightSidebar.vue";
+import Footer from "../components/includes/Footer.vue";
+
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,7 +39,25 @@ const router = createRouter({
         {
             path: "/dashboard",
             name: "dashboard",
-            component: Dashboard,
+            components: {
+                default: Dashboard,
+                navbar: Navbar,
+                left_sidebar: LeftSidebar,
+                right_sidebar: RightSidebar,
+                footer: Footer,
+            },
+            meta: { guarded: true },
+        },
+                {
+            path: "/profile",
+            name: "profile",
+            components: {
+                default: Profile,
+                navbar: Navbar,
+                left_sidebar: LeftSidebar,
+                right_sidebar: RightSidebar,
+                footer: Footer,
+            },
             meta: { guarded: true },
         },
         {
@@ -49,6 +76,12 @@ const router = createRouter({
             path: "/set-new-password",
             name: "auth.set-new-password",
             component: SetNewPassword,
+            meta: { guarded: false },
+        },
+                {
+            path: "/google/oauth/callback",
+            name: "auth.google.oauth.callback",
+            component: GoogleOAuth,
             meta: { guarded: false },
         },
         {
